@@ -1,14 +1,19 @@
 pluginManagement {
     repositories {
         mavenLocal()
-        mavenCentral()
+        maven { url 'https://vm-cis.rs.ru/repository/maven-central/' }
+        maven { url 'https://vm-cis.rs.ru/repository/gradle-plugins/' }
+        maven { url 'https://vm-cis.rs.ru/repository/third-party/' }
     }
 }
 
 dependencyResolutionManagement {
     repositories {
         mavenLocal()
-        mavenCentral()
+        maven { url 'https://vm-cis.rs.ru/repository/maven-central/' }
+        maven { url 'https://vm-cis.rs.ru/repository/third-party/' }
+        maven { url 'https://vm-cis.rs.ru/repository/maven-snapshots' }
+        maven { url 'https://vm-cis.rs.ru/repository/maven-releases' }
     }
 }
 

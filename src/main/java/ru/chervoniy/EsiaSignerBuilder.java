@@ -38,18 +38,17 @@ public class EsiaSignerBuilder {
     }
 
     /**
-     * Supplier example
-     * () -> {
-     *  try (InputStream stream = new FileInputStream("path/to/keystore.p12")) {
-     *      KeyStore store = KeyStore.getInstance("PKCS12");
-     *      store.load(stream, "p@ssword".toCharArray());
-     *      return store;
-     *  } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
-     *      throw new RuntimeException(e);
-     *  }
-     * };
-     *
      * @param keyStoreSupplier key store supplier, example:
+     *                         <p>
+     *                         () -> {
+     *                         try (InputStream stream = new FileInputStream("path/to/keystore.p12")) {
+     *                         KeyStore store = KeyStore.getInstance("PKCS12");
+     *                         store.load(stream, "p@ssword".toCharArray());
+     *                         return store;
+     *                         } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
+     *                         throw new RuntimeException(e);
+     *                         }
+     *                         };
      * @return this
      */
     public EsiaSignerBuilder keyStoreSupplier(Supplier<KeyStore> keyStoreSupplier) {
@@ -57,11 +56,20 @@ public class EsiaSignerBuilder {
         return this;
     }
 
+    /**
+     * @param signingCertificateAliasSupplier certificate alias for signing, which is located in keystore from {@link #keyStoreSupplier}
+     * @return this
+     */
     public EsiaSignerBuilder signingCertificateAliasSupplier(Supplier<String> signingCertificateAliasSupplier) {
         this.signingCertificateAliasSupplier = signingCertificateAliasSupplier;
         return this;
     }
 
+    /**
+     * @param privateKeyPasswordSupplier password for private key which is located in keystore from {@link #keyStoreSupplier} and using
+     *                                   for sign
+     * @return this
+     */
     public EsiaSignerBuilder privateKeyPasswordSupplier(Supplier<String> privateKeyPasswordSupplier) {
         this.privateKeyPasswordSupplier = privateKeyPasswordSupplier;
         return this;
@@ -80,4 +88,5 @@ public class EsiaSignerBuilder {
         return new EsiaSigner(this.signingAlgorithmSupplier, this.signatureProviderSupplier, this.keyStoreSupplier,
                 this.signingCertificateAliasSupplier, this.privateKeyPasswordSupplier, this.detachedFlagSupplier);
     }
+
 }
