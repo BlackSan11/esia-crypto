@@ -60,11 +60,20 @@ public class EsiaSignerBuilder {
         return this;
     }
 
+    /**
+     * @param signingCertificateAliasSupplier certificate alias for signing, which is located in keystore from {@link #keyStoreSupplier}
+     * @return this
+     */
     public EsiaSignerBuilder signingCertificateAliasSupplier(Supplier<String> signingCertificateAliasSupplier) {
         this.signingCertificateAliasSupplier = signingCertificateAliasSupplier;
         return this;
     }
 
+    /**
+     * @param privateKeyPasswordSupplier password for private key which is located in keystore from {@link #keyStoreSupplier} and using
+     *                                   for sign
+     * @return this
+     */
     public EsiaSignerBuilder privateKeyPasswordSupplier(Supplier<String> privateKeyPasswordSupplier) {
         this.privateKeyPasswordSupplier = privateKeyPasswordSupplier;
         return this;
@@ -83,4 +92,5 @@ public class EsiaSignerBuilder {
         return new EsiaSigner(this.signingAlgorithmSupplier, this.signatureProviderSupplier, this.keyStoreSupplier,
                 this.signingCertificateAliasSupplier, this.privateKeyPasswordSupplier, this.detachedFlagSupplier);
     }
+
 }

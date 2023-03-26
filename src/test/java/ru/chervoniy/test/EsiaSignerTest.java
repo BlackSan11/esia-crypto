@@ -10,7 +10,7 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.junit.jupiter.api.Test;
 import ru.chervoniy.EsiaSigner;
-import ru.chervoniy.exception.ServiceException;
+import ru.chervoniy.exception.EsiaSignerException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,60 +22,56 @@ import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EsiaSignerTest {
 
-    private static final String BC_PROVIDER = "BC";
-    private static final String SIGNING_DATA = "SIGNING_DATA";
     private static final String TEST_CERT_ALIAS = "test_cert";
+    private static final String SIGNING_DATA = "SIGNING_DATA";
     private static final String TEST_PASSWORD = "test_password";
+    private static final String DEFAULT_SIGNATURE_PROVIDER = "BC";
     private static final char[] TEST_PASSWORD_ARRAY = "test_password".toCharArray();
 
     @Test
     void providerAvailable() {
         EsiaSigner.builder().build();
-        Provider bcProvider = Security.getProvider(BC_PROVIDER);
+        Provider bcProvider = Security.getProvider(DEFAULT_SIGNATURE_PROVIDER);
         assertNotNull(bcProvider);
     }
 
     @Test
-    void signOk() throws ServiceException, KeyStoreException, OperatorCreationException, CMSException {
-        KeyStore store;
-        try (InputStream keystoreStream = EsiaSignerTest.class.getResourceAsStream("/test_keystore.jks")) {
-            store = KeyStore.getInstance("JKS");
-            store.load(keystoreStream, TEST_PASSWORD_ARRAY);
-        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        Supplier<KeyStore> keyStoreSupplier = () -> store;
+    void signOk() throws EsiaSignerException, KeyStoreException, OperatorCreationException, CMSException {
+        Supplier<KeyStore> keyStoreSupplier = () -> {
+            try (InputStream keystoreStream = EsiaSignerTest.class.getResourceAsStream("/test_keystore.jks")) {
+                KeyStore store = KeyStore.getInstance("JKS");
+                store.load(keystoreStream, TEST_PASSWORD_ARRAY);
+                return store;
+            } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+        };
         EsiaSigner esiaSigner = EsiaSigner.builder()
                 .keyStoreSupplier(keyStoreSupplier)
                 .privateKeyPasswordSupplier(() -> TEST_PASSWORD)
                 .signingCertificateAliasSupplier(() -> TEST_CERT_ALIAS)
                 .build();
-        String resultSignature = esiaSigner.signPck7Payload(SIGNING_DATA.getBytes(StandardCharsets.UTF_8));
-        assertNotNull(resultSignature);
-        assertFalse(resultSignature.isEmpty());
+        byte[] resultSignature = esiaSigner.signPkcs7(SIGNING_DATA.getBytes(StandardCharsets.UTF_8));
+        KeyStore keyStore = keyStoreSupplier.get();
+        X509Certificate certificateForVerify = (X509Certificate) keyStore.getCertificate(TEST_CERT_ALIAS);
 
-        CMSProcessableByteArray cmsProcessableByteArray = new CMSProcessableByteArray(SIGNING_DATA.getBytes());
-        byte[] signedByte = Base64.getUrlDecoder().decode(resultSignature);
-        CMSSignedData cmsSignedData = new CMSSignedData(cmsProcessableByteArray, signedByte);
+        CMSSignedData cmsSignedData =
+                new CMSSignedData(new CMSProcessableByteArray((SIGNING_DATA).getBytes(StandardCharsets.UTF_8)), resultSignature);
         SignerInformationStore signerInformationStore = cmsSignedData.getSignerInfos();
         SignerInformation signerInfo = signerInformationStore.getSigners().iterator().next();
 
-        X509Certificate testCertificate = (X509Certificate) store.getCertificate(TEST_CERT_ALIAS);
-
-        SignerInformationVerifier signerInformationVerifier = new JcaSimpleSignerInfoVerifierBuilder()
-                .setProvider(BC_PROVIDER)
-                .build(testCertificate.getPublicKey());
-        boolean result = signerInfo.verify(signerInformationVerifier);
-        assertTrue(result);
+        SignerInformationVerifier signVerifier = new JcaSimpleSignerInfoVerifierBuilder()
+                .setProvider(DEFAULT_SIGNATURE_PROVIDER)
+                .build(certificateForVerify);
+        boolean verifyResult = signerInfo.verify(signVerifier);
+        assertTrue(verifyResult);
     }
 
 }
