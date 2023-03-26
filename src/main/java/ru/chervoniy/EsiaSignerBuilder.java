@@ -38,18 +38,21 @@ public class EsiaSignerBuilder {
     }
 
     /**
-     * Supplier example
-     * () -> {
-     *  try (InputStream stream = new FileInputStream("path/to/keystore.p12")) {
-     *      KeyStore store = KeyStore.getInstance("PKCS12");
-     *      store.load(stream, "p@ssword".toCharArray());
-     *      return store;
-     *  } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
-     *      throw new RuntimeException(e);
-     *  }
+     * Keystore supplier example:
+     * <pre>{@code
+     * Supplier<KeyStore> keystoreSupplier = () -> {
+     *      try (InputStream stream = new FileInputStream("path/to/keystore.p12")) {
+     *          KeyStore store = KeyStore.getInstance("PKCS12");
+     *          store.load(stream, "p@ssword".toCharArray());
+     *          return store;
+     *      } catch (Exception e) {
+     *          log.error("Keystore loading error", e);
+     *          throw new RuntimeException(e);
+     *      }
      * };
+     * }</pre>
      *
-     * @param keyStoreSupplier key store supplier, example:
+     * @param keyStoreSupplier key store supplier
      * @return this
      */
     public EsiaSignerBuilder keyStoreSupplier(Supplier<KeyStore> keyStoreSupplier) {

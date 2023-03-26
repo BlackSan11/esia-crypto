@@ -76,11 +76,13 @@ public class EsiaSigner {
             byte[] signedDataEncoded = signedData.getEncoded();
             ASN1Primitive asn1Primitive = ASN1Primitive.fromByteArray(signedDataEncoded);
             ContentInfo contentInfo = ContentInfo.getInstance(asn1Primitive);
-            StringWriter stringWriter = new StringWriter();
-            JcaPEMWriter writer = new JcaPEMWriter(stringWriter);
-            writer.writeObject(contentInfo);
-            writer.close();
-            String pemPayload = stringWriter.toString();
+            String pemPayload;
+            try (StringWriter stringWriter = new StringWriter();
+                 JcaPEMWriter writer = new JcaPEMWriter(stringWriter)) {
+                writer.writeObject(contentInfo);
+                writer.close();
+                pemPayload = stringWriter.toString();
+            }
             try (StringReader stringReader = new StringReader(pemPayload);
                  PemReader pemReader = new PemReader(stringReader)) {
                 PemObject pemObject = pemReader.readPemObject();
