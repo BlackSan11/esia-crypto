@@ -60,8 +60,8 @@ public class EsiaSigner {
     }
 
     /**
-     * @param payload data for signing
-     * @return base64 encoded signature
+     * @param payload data for signing, not base64, only raw data bytes
+     * @return signature byte array
      * @throws EsiaSignerException if error occur in signature generating
      */
     public byte[] signPkcs7(byte[] payload) throws EsiaSignerException {
