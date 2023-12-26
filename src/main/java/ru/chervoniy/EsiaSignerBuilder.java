@@ -1,6 +1,7 @@
 package ru.chervoniy;
 
 import java.security.KeyStore;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class EsiaSignerBuilder {
@@ -13,7 +14,7 @@ public class EsiaSignerBuilder {
     private Supplier<KeyStore> keyStoreSupplier;
     private Supplier<String> signingCertificateAliasSupplier;
     private Supplier<String> privateKeyPasswordSupplier;
-    private Supplier<Boolean> detachedFlagSupplier = () -> true;
+    private BooleanSupplier detachedFlagSupplier = () -> true;
 
     static EsiaSignerBuilder builder() {
         return new EsiaSignerBuilder();
@@ -83,7 +84,7 @@ public class EsiaSignerBuilder {
      * @param detachedFlagSupplier signature detached flag, default = true
      * @return this
      */
-    public EsiaSignerBuilder detachedFlagSupplier(Supplier<Boolean> detachedFlagSupplier) {
+    public EsiaSignerBuilder detachedFlagSupplier(BooleanSupplier detachedFlagSupplier) {
         this.detachedFlagSupplier = detachedFlagSupplier;
         return this;
     }
