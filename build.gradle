@@ -8,7 +8,6 @@ version '1.0.0'
 dependencies {
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.71'
     implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.71'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
