@@ -29,6 +29,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class EsiaSigner {
@@ -42,11 +43,11 @@ public class EsiaSigner {
     private final Supplier<KeyStore> keyStoreSupplier;
     private final Supplier<String> signingCertificateAliasSupplier;
     private final Supplier<String> privateKeyPasswordSupplier;
-    private final Supplier<Boolean> detachedFlagSupplier;
+    private final BooleanSupplier detachedFlagSupplier;
 
     EsiaSigner(Supplier<String> signingAlgorithmSupplier, Supplier<String> signatureProviderSupplier,
                Supplier<KeyStore> keyStoreSupplier, Supplier<String> signingCertificateAliasSupplier,
-               Supplier<String> privateKeyPasswordSupplier, Supplier<Boolean> detachedFlagSupplier) {
+               Supplier<String> privateKeyPasswordSupplier, BooleanSupplier detachedFlagSupplier) {
         this.signingAlgorithmSupplier = signingAlgorithmSupplier;
         this.signatureProviderSupplier = signatureProviderSupplier;
         this.keyStoreSupplier = keyStoreSupplier;
@@ -68,7 +69,7 @@ public class EsiaSigner {
         CMSTypedData cmsData = new CMSProcessableByteArray(payload);
         try {
             CMSSignedDataGenerator signatureProvider = getSignatureProvider();
-            boolean detached = this.detachedFlagSupplier.get();
+            boolean detached = this.detachedFlagSupplier.getAsBoolean();
             CMSSignedData signedData = signatureProvider.generate(cmsData, !detached);
             return signedData.getEncoded();
         } catch (CMSException | IOException e) {
